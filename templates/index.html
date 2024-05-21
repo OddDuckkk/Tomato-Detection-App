@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tomato Counter</title>
+</head>
+<body>
+    <h1>Tomato Detection Counter</h1>
+    <p>Fresh Tomatoes: <span id="fresh-count">0</span></p>
+    <p>Rotten Tomatoes: <span id="rotten-count">0</span></p>
+
+    <script>
+        async function updateCounts() {
+            try {
+                const response = await fetch('http://localhost:5000/count');
+                const data = await response.json();
+                document.getElementById('fresh-count').innerText = data.fresh;
+                document.getElementById('rotten-count').innerText = data.rotten;
+            } catch (error) {
+                console.error('Error fetching counts:', error);
+            }
+        }
+
+        setInterval(updateCounts, 1000);  // Update every second
+        updateCounts();  // Initial call to set the counts immediately
+    </script>
+</body>
+</html>
