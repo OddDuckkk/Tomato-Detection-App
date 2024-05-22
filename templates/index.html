@@ -1,14 +1,83 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tomato Counter</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(to right, #ffecd2 0%, #fcb69f 100%);
+            color: #333;
+        }
+
+        .container {
+            text-align: center;
+            background: white;
+            padding: 80px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            max-width: 600px;
+            width: 100%;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 50px;
+        }
+
+        .counter {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 30px;
+        }
+
+        .counter div {
+            display: flex;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .counter img {
+            width: 100px;
+            height: 100px;
+            margin-bottom: 10px;
+        }
+
+        .counter p {
+            font-size: 1.5em;
+            margin: 0;
+        }
+
+        .counter span {
+            font-size: 2em;
+            font-weight: bold;
+        }
+    </style>
 </head>
+
 <body>
-    <h1>Tomato Detection Counter</h1>
-    <p>Fresh Tomatoes: <span id="fresh-count">0</span></p>
-    <p>Rotten Tomatoes: <span id="rotten-count">0</span></p>
+    <div class="container">
+        <h1>Tomato Detection Counter</h1>
+        <div class="counter">
+            <div>
+                <img src="https://img.icons8.com/color/48/000000/tomato.png" alt="Fresh Tomato">
+                <p>Fresh Tomatoes: <span id="fresh-count">0</span></p>
+            </div>
+            <div>
+                <img src="https://img.icons8.com/color/48/000000/tomato.png" alt="Rotten Tomato"
+                    style="filter: grayscale(100%);">
+                <p>Rotten Tomatoes: <span id="rotten-count">0</span></p>
+            </div>
+        </div>
+    </div>
 
     <script>
         async function updateCounts() {
@@ -26,4 +95,5 @@
         updateCounts();  // Initial call to set the counts immediately
     </script>
 </body>
+
 </html>
