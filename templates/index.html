@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tomato Counter</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
     <style>
         body {
             font-family: 'Roboto', sans-serif;
@@ -64,36 +65,76 @@
 </head>
 
 <body>
-    <div class="container">
-        <h1>Tomato Detection Counter</h1>
-        <div class="counter">
-            <div>
-                <img src="https://img.icons8.com/color/48/000000/tomato.png" alt="Fresh Tomato">
-                <p>Fresh Tomatoes: <span id="fresh-count">0</span></p>
-            </div>
-            <div>
-                <img src="https://img.icons8.com/color/48/000000/tomato.png" alt="Rotten Tomato"
-                    style="filter: grayscale(100%);">
-                <p>Rotten Tomatoes: <span id="rotten-count">0</span></p>
-            </div>
+<div class="container">
+    <h1>Tomato Detection Counter</h1>
+    <div class="counter">
+        <div>
+            <img src="https://img.icons8.com/color/48/000000/tomato.png" alt="Fresh Tomato">
+            <p>Fresh Tomatoes: <span id="fresh-count">0</span></p>
+        </div>
+        <div>
+            <img src="https://img.icons8.com/color/48/000000/tomato.png" alt="Rotten Tomato"
+                 style="filter: grayscale(100%);">
+            <p>Rotten Tomatoes: <span id="rotten-count">0</span></p>
         </div>
     </div>
+</div>
+<div class="container">
+    <canvas id="tomatoChart"></canvas>
+</div>
 
-    <script>
-        async function updateCounts() {
-            try {
-                const response = await fetch('http://localhost:5000/count');
-                const data = await response.json();
-                document.getElementById('fresh-count').innerText = data.fresh;
-                document.getElementById('rotten-count').innerText = data.rotten;
-            } catch (error) {
-                console.error('Error fetching counts:', error);
+<script>
+    async function updateCounts() {
+      try {
+        const response = await fetch('http://127.0.0.1:5000/count');
+        const data = await response.json();
+
+        // Update counter display
+        document.getElementById('fresh-count').innerText = data.fresh;
+        document.getElementById('rotten-count').innerText = data.rotten;
+
+        // Create chart data object
+        const chartData = {
+          labels: ['Fresh', 'Rotten'],
+          datasets: [{
+            label: 'Tomato Counts',
+            data: [data.fresh, data.rotten],
+            backgroundColor: ['#ffcccc', '#ff9999'],
+            borderColor: ['#ffcccc', '#ff9999']
+          }]
+        };
+
+        // Get the chart canvas element
+        const ctx = document.getElementById('tomatoChart').getContext('2d');
+
+        // Check if chart instance exists (initial render)
+        if (typeof chart !== 'undefined') {
+          chart.data.datasets[0].data = [data.fresh, data.rotten];  // Update data
+          chart.type = 'bar';  // Change chart type to 'bar'
+          chart.update();  // Call update method to reflect changes
+        } else {
+          // Create the chart for the first time
+          chart = new Chart(ctx, {
+            type: 'bar',  // Set chart type to 'bar' initially
+            data: chartData,
+            options: {
+              responsive: true,
+              plugins: {
+                legend: {
+                  display: true,
+                }
+              }
             }
+          });
         }
-
+      } catch (error) {
+        console.error('Error fetching counts:', error);
+      }
+    }
         setInterval(updateCounts, 1000);  // Update every second
         updateCounts();  // Initial call to set the counts immediately
-    </script>
+
+</script>
 </body>
 
 </html>
