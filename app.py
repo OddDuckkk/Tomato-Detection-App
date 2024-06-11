@@ -3,8 +3,13 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timedelta
 import threading
 import time
+import pytz
+import logging
 
 app = Flask(__name__)
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
 
 # Configure the database URI
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///tomato_counts.db'
@@ -20,11 +25,16 @@ class TomatoCount(db.Model):
     fresh_count = db.Column(db.Integer, nullable=False)
     rotten_count = db.Column(db.Integer, nullable=False)
 
+#Define Timezone
+timezone = 'Asia/Makassar'
+local_tz = pytz.timezone(timezone)
+
 # Initialize counters
+time_init = datetime.now(local_tz)
 counters = {
     'fresh': 0,
     'rotten': 0,
-    'last_reset': datetime.now().date()
+    'last_reset': time_init.date()
 }
 
 # Lock for thread-safe counter updates
@@ -33,7 +43,10 @@ counter_lock = threading.Lock()
 def reset_counters():
     global counters
     while True:
-        now = datetime.now()
+        now = datetime.now(local_tz)
+        print(f"Current time: {now}")
+        print(f"Last reset: {counters['last_reset']}")
+        now = datetime.now(local_tz)
         if now.date() != counters['last_reset']:
             with counter_lock:
                 # Save the counts to the database before resetting
