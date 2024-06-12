@@ -25,7 +25,7 @@ class TomatoCount(db.Model):
     fresh_count = db.Column(db.Integer, nullable=False)
     rotten_count = db.Column(db.Integer, nullable=False)
 
-#Define Timezone
+# Define Timezone
 timezone = 'Asia/Makassar'
 local_tz = pytz.timezone(timezone)
 
@@ -34,7 +34,7 @@ time_init = datetime.now(local_tz)
 counters = {
     'fresh': 0,
     'rotten': 0,
-    'last_reset': time_init.date()
+    'last_reset': time_init.date() # time_init.date() - timedelta(days=1)
 }
 
 # Lock for thread-safe counter updates
@@ -42,28 +42,35 @@ counter_lock = threading.Lock()
 
 def reset_counters():
     global counters
-    while True:
-        now = datetime.now(local_tz)
-        print(f"Current time: {now}")
-        print(f"Last reset: {counters['last_reset']}")
-        now = datetime.now(local_tz)
-        if now.date() != counters['last_reset']:
-            with counter_lock:
-                # Save the counts to the database before resetting
-                new_record = TomatoCount(
-                    date=counters['last_reset'],
-                    fresh_count=counters['fresh'],
-                    rotten_count=counters['rotten']
-                )
-                db.session.add(new_record)
-                db.session.commit()
-
-                # Reset the counters
-                counters['fresh'] = 0
-                counters['rotten'] = 0
-                counters['last_reset'] = now.date()
-        # Sleep for a short period to reduce CPU usage
-        time.sleep(60)
+    with app.app_context():  # Ensure this function runs within the Flask app context
+        while True:
+            now = datetime.now(local_tz)
+            logging.info(f"Current time: {now}")
+            logging.info(f"Last reset: {counters['last_reset']}")
+            
+            if now.date() != counters['last_reset']:
+                with counter_lock:
+                    try:
+                        # Save the counts to the database before resetting
+                        new_record = TomatoCount(
+                            date=counters['last_reset'],
+                            fresh_count=counters['fresh'],
+                            rotten_count=counters['rotten']
+                        )
+                        db.session.add(new_record)
+                        db.session.commit()
+                        
+                        # Reset the counters
+                        counters['fresh'] = 0
+                        counters['rotten'] = 0
+                        counters['last_reset'] = now.date()
+                        logging.info("Counters have been reset.")
+                    except Exception as e:
+                        db.session.rollback()
+                        logging.error(f"Failed to reset counters: {e}")
+            
+            # Sleep for a short period to reduce CPU usage
+            time.sleep(60)
 
 @app.route('/')
 def index():

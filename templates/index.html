@@ -86,7 +86,7 @@
 <script>
     async function updateCounts() {
       try {
-        const response = await fetch('https://tomato-detection-app.vercel.app/count');
+        const response = await fetch('http://127.0.0.1:5000/count');
         const data = await response.json();
 
         // Update counter display
