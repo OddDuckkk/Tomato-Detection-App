@@ -32,8 +32,8 @@ local_tz = pytz.timezone(timezone)
 # Initialize counters
 time_init = datetime.now(local_tz)
 counters = {
-    'fresh': 50,
-    'rotten': 25,
+    'fresh': 0,
+    'rotten': 0,
     'last_reset': time_init.date() # - timedelta(days=1)
 }
 

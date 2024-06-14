@@ -113,7 +113,7 @@
 <script>
     async function updateCounts() {
       try {
-        const response = await fetch('http://127.0.0.1:5000/count');
+        const response = await fetch('/count');
         const data = await response.json();
 
         // Update counter display
@@ -159,65 +159,13 @@
       }
     }
 
-    // async function fetchHistory(days = 7) {
-    //   console.log('test')
-    //     try {
-    //       const response = await fetch("http://127.0.0.1:5000/history");
-    //       const historyData = await response.json();
-    //       const historyChartData = {
-    //         labels: historyData.dates,
-    //         datasets: [
-    //             {
-    //               label: 'Fresh Tomatoes',
-    //               data: historyData.fresh_counts,
-    //               // borderColor: '#ff9999',
-    //               // fill: false,
-    //             }
-    //               // ,
-    //               // {
-    //               //     label: 'Rotten Tomatoes',
-    //               //     data: historyData.rotten_counts,
-    //               //     borderColor: '#333',
-    //               //     fill: false,
-    //               // }
-    //           ]
-    //         };
-
-    //         const historyCtx = document.getElementById('historyChart').getContext('2d');
-    //         //Check if history chart is already loaded
-    //         if (typeof historyChart !== 'undefined') {
-    //           historyChart.data.labels = historyChartData.labels;  // Update labels
-    //           historyChart.data.datasets[0].data = historyChartData.datasets[0].data;  // Update data
-    //           historyChart.data.datasets[1].data = historyChartData.datasets[1].data;  // Update data
-    //           historyChart.update();  // Call update method to reflect changes
-    //         }
-    //         else {
-    //           // Create the chart for the first time
-    //           historyChart = new Chart(historyCtx, {
-    //             type: 'line',
-    //             data: historyChartData,
-    //             options: {
-    //               responsive: true,
-    //               plugins: {
-    //                 legend: {
-    //                   display: true,
-    //                 }
-    //               }
-    //             }
-    //         });
-    //         }
-    //       }catch (error) {
-    //         console.error('Error fetching history:', error);
-    //       } 
-    //     }
-
     let historyChart; // Declare historyChart in a higher scope
 
 async function fetchHistory(days = 7) {
     console.log('test');
 
     try {
-        const response = await fetch("http://127.0.0.1:5000/history");
+        const response = await fetch("/history");
         const historyData = await response.json();
 
         // Ensure data arrays are at least 7 data points long by padding with nulls or slicing
