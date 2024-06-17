@@ -5,6 +5,8 @@ import threading
 import time
 import pytz
 import logging
+from flask_migrate import Migrate
+import os
 
 app = Flask(__name__)
 
@@ -12,14 +14,21 @@ app = Flask(__name__)
 logging.basicConfig(level=logging.INFO)
 
 # Configure the database URI
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///tomato_counts.db'
+DATABASE_USER = os.environ.get("POSTGRES_USER")
+DATABASE_PASSWORD = os.environ.get("POSTGRES_PASSWORD")
+DATABASE_HOST = os.environ.get("POSTGRES_HOST")
+DATABASE_DATABASE = os.environ.get("POSTGRES_DATABASE")
+app.config['SQLALCHEMY_DATABASE_URI'] = f"postgresql://{DATABASE_USER}:{DATABASE_PASSWORD}@{DATABASE_HOST}:5432/{DATABASE_DATABASE}"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Initialize the database
 db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 
 # Define the model for daily counts
 class TomatoCount(db.Model):
+    __tablename__ = 'tomato_count'
+
     id = db.Column(db.Integer, primary_key=True)
     date = db.Column(db.Date, nullable=False, unique=True)
     fresh_count = db.Column(db.Integer, nullable=False)
@@ -34,7 +43,7 @@ time_init = datetime.now(local_tz)
 counters = {
     'fresh': 0,
     'rotten': 0,
-    'last_reset': time_init.date() # - timedelta(days=1)
+    'last_reset': time_init.date()
 }
 
 # Lock for thread-safe counter updates
@@ -51,22 +60,12 @@ def reset_counters():
             if now.date() != counters['last_reset']:
                 with counter_lock:
                     try:
-                        # Save the counts to the database before resetting
-                        new_record = TomatoCount(
-                            date=counters['last_reset'],
-                            fresh_count=counters['fresh'],
-                            rotten_count=counters['rotten']
-                        )
-                        db.session.add(new_record)
-                        db.session.commit()
-                        
                         # Reset the counters
                         counters['fresh'] = 0
                         counters['rotten'] = 0
                         counters['last_reset'] = now.date()
                         logging.info("Counters have been reset.")
                     except Exception as e:
-                        db.session.rollback()
                         logging.error(f"Failed to reset counters: {e}")
             else:
                 logging.info("No reset needed.")
@@ -88,6 +87,28 @@ def update_counter():
             counters['fresh'] += 1
         elif detection_result['type'] == 'rotten':
             counters['rotten'] += 1
+
+        try:
+            # Save the counts to the database immediately when they are updated
+            date_today = datetime.now(local_tz).date()
+            record = TomatoCount.query.filter_by(date=date_today).first()
+
+            if record is None:
+                record = TomatoCount(
+                    date=date_today,
+                    fresh_count=counters['fresh'],
+                    rotten_count=counters['rotten']
+                )
+                db.session.add(record)
+            else:
+                record.fresh_count = counters['fresh']
+                record.rotten_count = counters['rotten']
+
+            db.session.commit()
+            logging.info("Counters have been updated and saved.")
+        except Exception as e:
+            db.session.rollback()
+            logging.error(f"Failed to update counters: {e}")
 
     return jsonify(success=True)
 
