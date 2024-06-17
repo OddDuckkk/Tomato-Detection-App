@@ -18,7 +18,7 @@ DATABASE_USER = os.environ.get("POSTGRES_USER")
 DATABASE_PASSWORD = os.environ.get("POSTGRES_PASSWORD")
 DATABASE_HOST = os.environ.get("POSTGRES_HOST")
 DATABASE_DATABASE = os.environ.get("POSTGRES_DATABASE")
-app.config['SQLALCHEMY_DATABASE_URI'] = f"postgresql://{DATABASE_USER}:{DATABASE_PASSWORD}@{DATABASE_HOST}:5432/{DATABASE_DATABASE}"
+app.config['SQLALCHEMY_DATABASE_URI'] = "postgres://default:************@ep-plain-recipe-a4h8buv1.us-east-1.aws.neon.tech:5432/verceldb?sslmode=require" # f"postgresql://{DATABASE_USER}:{DATABASE_PASSWORD}@{DATABASE_HOST}:5432/{DATABASE_DATABASE}"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Initialize the database
